@@ -192,7 +192,7 @@ MIT License - See LICENSE file for details
 
 For issues or questions:
 - Open a GitHub issue
-- Contact: [your-email@example.com]
+- Contact: [canarylumen@gmail.com]
 
 ## 🙏 Acknowledgments
 
