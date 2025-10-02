@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { MapPin, AlertCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NearestCard from "@/components/NearestCard";
 import HospitalList from "@/components/HospitalList";
+import MapClient from "@/components/MapClient";
 import type { Hospital, UserLocation } from "@/lib/geolocation";
 import { getUserLocation, sortHospitalsByDistance } from "@/lib/geolocation";
-
-// Lazy load the map component to reduce initial bundle size
-const MapClient = lazy(() => import("@/components/MapClient"));
 
 // Default center (Tsuchiura, Ibaraki)
 const DEFAULT_CENTER: [number, number] = [36.0833, 140.2];
@@ -162,22 +160,11 @@ const Index = () => {
         {/* Desktop layout: Map + List side by side */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 h-[calc(100vh-12rem)]">
           <div className="lg:col-span-3 h-full">
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-primary mx-auto mb-2 animate-pulse" />
-                    <p className="text-sm text-muted-foreground">Loading map...</p>
-                  </div>
-                </div>
-              }
-            >
-              <MapClient
-                hospitals={sortedHospitals}
-                userLocation={userLocation}
-                center={mapCenter}
-              />
-            </Suspense>
+            <MapClient
+              hospitals={sortedHospitals}
+              userLocation={userLocation}
+              center={mapCenter}
+            />
           </div>
           <div className="lg:col-span-2 overflow-y-auto border-l">
             <HospitalList hospitals={sortedHospitals} />
@@ -187,22 +174,11 @@ const Index = () => {
         {/* Mobile layout: Map on top, list below */}
         <div className="md:hidden">
           <div className="h-[50vh] w-full">
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <div className="text-center">
-                    <MapPin className="h-12 w-12 text-primary mx-auto mb-2 animate-pulse" />
-                    <p className="text-sm text-muted-foreground">Loading map...</p>
-                  </div>
-                </div>
-              }
-            >
-              <MapClient
-                hospitals={sortedHospitals}
-                userLocation={userLocation}
-                center={mapCenter}
-              />
-            </Suspense>
+            <MapClient
+              hospitals={sortedHospitals}
+              userLocation={userLocation}
+              center={mapCenter}
+            />
           </div>
           <HospitalList hospitals={sortedHospitals} />
         </div>
