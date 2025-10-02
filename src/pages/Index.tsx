@@ -7,7 +7,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NearestCard from "@/components/NearestCard";
 import HospitalList from "@/components/HospitalList";
-import MapClient from "@/components/MapClient";
 import type { Hospital, UserLocation } from "@/lib/geolocation";
 import { getUserLocation, sortHospitalsByDistance } from "@/lib/geolocation";
 
@@ -18,7 +17,6 @@ const Index = () => {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [sortedHospitals, setSortedHospitals] = useState<Hospital[]>([]);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -46,7 +44,6 @@ const Index = () => {
     getUserLocation()
       .then((location) => {
         setUserLocation(location);
-        setMapCenter([location.lat, location.lng]);
         setLocationError(null);
         
         // Sort hospitals by distance
@@ -91,7 +88,6 @@ const Index = () => {
     getUserLocation()
       .then((location) => {
         setUserLocation(location);
-        setMapCenter([location.lat, location.lng]);
         setLocationError(null);
         
         const sorted = sortHospitalsByDistance(hospitals, location);
@@ -115,7 +111,7 @@ const Index = () => {
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 bg-muted/20">
         {/* Location prompt banner */}
         {locationError && (
           <motion.div
@@ -157,29 +153,8 @@ const Index = () => {
           </motion.div>
         )}
 
-        {/* Desktop layout: Map + List side by side */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 h-[calc(100vh-12rem)]">
-          <div className="lg:col-span-3 h-full">
-            <MapClient
-              hospitals={sortedHospitals}
-              userLocation={userLocation}
-              center={mapCenter}
-            />
-          </div>
-          <div className="lg:col-span-2 overflow-y-auto border-l">
-            <HospitalList hospitals={sortedHospitals} />
-          </div>
-        </div>
-
-        {/* Mobile layout: Map on top, list below */}
-        <div className="md:hidden">
-          <div className="h-[50vh] w-full">
-            <MapClient
-              hospitals={sortedHospitals}
-              userLocation={userLocation}
-              center={mapCenter}
-            />
-          </div>
+        {/* Hospital List - full width for now (no map) */}
+        <div className="container max-w-4xl mx-auto">
           <HospitalList hospitals={sortedHospitals} />
         </div>
       </main>
