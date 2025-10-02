@@ -1,0 +1,152 @@
+[
+  {
+    "id": "h1",
+    "name": "Tsuchiura Kyodo General Hospital",
+    "lat": 36.08322,
+    "lng": 140.26005,
+    "departments": ["Emergency", "Internal Medicine", "Pediatrics", "Surgery"],
+    "night_service": true,
+    "tel": "+81-29-830-3711",
+    "official": "https://www.tkgh.jp/"
+  },
+  {
+    "id": "h2",
+    "name": "University of Tsukuba Hospital",
+    "lat": 36.09239,
+    "lng": 140.10250,
+    "departments": ["Emergency", "Cardiology", "Neurology", "Pediatrics", "Surgery"],
+    "night_service": true,
+    "tel": "+81-29-853-3900",
+    "official": "https://www.hosp.tsukuba.ac.jp/en/"
+  },
+  {
+    "id": "h3",
+    "name": "Tsukuba Medical Center Hospital",
+    "lat": 36.10300,
+    "lng": 140.12000,
+    "departments": ["Emergency", "Critical Care", "Internal Medicine"],
+    "night_service": true,
+    "tel": "+81-29-xxx-xxxx",
+    "official": "https://en.tmch.or.jp/"
+  },
+  {
+    "id": "h4",
+    "name": "Ibaraki Prefectural Central Hospital (Chuo)",
+    "lat": 36.33000,
+    "lng": 140.25000,
+    "departments": ["General Medicine", "Surgery", "Emergency"],
+    "night_service": true,
+    "tel": "+81-29-xxx-xxxx",
+    "official": "https://www.hospital.pref.ibaraki.jp/chuo/"
+  },
+  {
+    "id": "h5",
+    "name": "Mito Saiseikai General Hospital",
+    "lat": 36.39850,
+    "lng": 140.39487,
+    "departments": ["Emergency", "Surgery", "Orthopedics"],
+    "night_service": true,
+    "tel": "+81-29-254-5151",
+    "official": "https://www.mito-saiseikai.jp/"
+  },
+  {
+    "id": "h6",
+    "name": "Aisenkai Hitachi Medical Center Hospital",
+    "lat": 36.59400,
+    "lng": 140.65900,
+    "departments": ["Internal Medicine", "Surgery", "Emergency"],
+    "night_service": true,
+    "tel": "+81-29-436-2551",
+    "official": "https://www.hitachi-mch.or.jp/"
+  },
+  {
+    "id": "h7",
+    "name": "Ibaraki Western Medical Center",
+    "lat": 36.35000,
+    "lng": 140.45000,
+    "departments": ["Internal Medicine", "Rehabilitation", "Surgery"],
+    "night_service": false,
+    "tel": "+81-29-624-9111",
+    "official": "http://iwmo.or.jp/"
+  },
+  {
+    "id": "h8",
+    "name": "Kasumigaura Heart Clinic",
+    "lat": 36.07680,
+    "lng": 140.22010,
+    "departments": ["Cardiology", "Internal Medicine"],
+    "night_service": false,
+    "tel": "+81-29-444-4444",
+    "official": "https://kasumi-heart.jp/"
+  },
+  {
+    "id": "h9",
+    "name": "Sakura Night Emergency Center (example)",
+    "lat": 36.08750,
+    "lng": 140.21590,
+    "departments": ["Emergency"],
+    "night_service": true,
+    "tel": "+81-29-555-5555",
+    "official": "https://sakura-emergency.jp/"
+  },
+  {
+    "id": "h10",
+    "name": "Hitachinaka General Hospital",
+    "lat": 36.38000,
+    "lng": 140.44500,
+    "departments": ["Emergency", "Orthopedics"],
+    "night_service": false,
+    "tel": "+81-29-271-3409",
+    "official": "https://www.example-hitachinaka.jp/"
+  },
+  {
+    "id": "h11",
+    "name": "Koyo Central Clinic",
+    "lat": 36.07980,
+    "lng": 140.22500,
+    "departments": ["Internal Medicine", "Dermatology"],
+    "night_service": true,
+    "tel": "+81-29-777-7777",
+    "official": "https://koyo-clinic.jp/"
+  },
+  {
+    "id": "h12",
+    "name": "Shinonome Orthopedic Hospital",
+    "lat": 36.09550,
+    "lng": 140.21020,
+    "departments": ["Orthopedics", "Sports Medicine"],
+    "night_service": false,
+    "tel": "+81-29-888-8888",
+    "official": "https://shinonome-ortho.jp/"
+  },
+  {
+    "id": "h13",
+    "name": "Aoba Family Health Center",
+    "lat": 36.08430,
+    "lng": 140.19770,
+    "departments": ["Family Medicine", "Pediatrics"],
+    "night_service": true,
+    "tel": "+81-29-999-9999",
+    "official": "https://aoba-health.jp/"
+  },
+  {
+    "id": "h14",
+    "name": "Higashi Medical Plaza",
+    "lat": 36.08170,
+    "lng": 140.20510,
+    "departments": ["General Medicine", "ENT"],
+    "night_service": false,
+    "tel": "+81-29-123-4567",
+    "official": "https://higashi-medical.jp/"
+  },
+  {
+    "id": "h15",
+    "name": "Kandatsu Hospital",
+    "lat": 36.05000,
+    "lng": 140.18000,
+    "departments": ["General Medicine", "Emergency"],
+    "night_service": false,
+    "tel": "+81-29-xxx-xxxx",
+    "official": "https://example-kandatsu.jp/"
+  }
+]
