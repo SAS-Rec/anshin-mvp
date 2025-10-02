@@ -83,11 +83,9 @@ export default function MapClient({ hospitals, userLocation, center }: MapClient
     );
   }
 
-  const mapCenter: L.LatLngExpression = center;
-
   return (
     <MapContainer
-      {...{ center: mapCenter } as any}
+      center={center}
       zoom={11}
       scrollWheelZoom={true}
       className="h-full w-full"
@@ -98,8 +96,8 @@ export default function MapClient({ hospitals, userLocation, center }: MapClient
       
       {userLocation && (
         <Marker
-          position={[userLocation.lat, userLocation.lng] as L.LatLngExpression}
-          {...{ icon: blueIcon } as any}
+          position={[userLocation.lat, userLocation.lng]}
+          icon={blueIcon}
         >
           <Popup>
             <div className="p-2">
@@ -114,8 +112,8 @@ export default function MapClient({ hospitals, userLocation, center }: MapClient
         return (
           <Marker
             key={hospital.id}
-            position={[hospital.lat, hospital.lng] as L.LatLngExpression}
-            {...{ icon } as any}
+            position={[hospital.lat, hospital.lng]}
+            icon={icon}
           >
             <Popup>
               <div className="p-2">
