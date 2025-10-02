@@ -202,4 +202,4 @@ For issues or questions:
 
 ---
 
-**Built with ❤️ for emergency preparedness in Ibaraki Prefecture**
+**Built with ❤️ for Tom by Treasure**
