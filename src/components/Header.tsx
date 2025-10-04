@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { TranslatedText } from "./TranslatedText";
 
 const navItems = [
   { name: "Hospital Finder", path: "/", icon: MapPin },
@@ -23,7 +25,9 @@ export default function Header() {
             <MapPin className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">Anshin Map</h1>
+            <h1 className="text-lg font-bold text-foreground">
+              <TranslatedText text="Anshin Map" />
+            </h1>
             <p className="text-xs text-muted-foreground">Beta</p>
           </div>
         </Link>
@@ -41,7 +45,7 @@ export default function Header() {
                   className="gap-2"
                 >
                   <Icon className="h-4 w-4" />
-                  {item.name}
+                  <TranslatedText text={item.name} />
                 </Button>
               </Link>
             );
@@ -50,6 +54,7 @@ export default function Header() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <Button
             variant="outline"
             size="sm"
@@ -58,7 +63,7 @@ export default function Header() {
           >
             <a href="tel:119">
               <Phone className="h-4 w-4 text-emergency" />
-              <span>Call 119</span>
+              <span><TranslatedText text="Call 119" /></span>
             </a>
           </Button>
 
@@ -117,7 +122,7 @@ export default function Header() {
                       className="w-full justify-start gap-3"
                     >
                       <Icon className="h-5 w-5" />
-                      {item.name}
+                      <TranslatedText text={item.name} />
                     </Button>
                   </Link>
                 );
@@ -130,7 +135,7 @@ export default function Header() {
                 >
                   <a href="tel:119">
                     <Phone className="h-5 w-5 text-emergency" />
-                    Emergency Call 119
+                    <TranslatedText text="Emergency Call 119" />
                   </a>
                 </Button>
                 <Button
@@ -144,7 +149,7 @@ export default function Header() {
                     rel="noopener noreferrer"
                   >
                     <ExternalLink className="h-5 w-5" />
-                    Official City Page
+                    <TranslatedText text="Official City Page" />
                   </a>
                 </Button>
               </div>
