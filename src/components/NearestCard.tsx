@@ -4,12 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Hospital } from "@/lib/geolocation";
 import { getDirectionsUrl } from "@/lib/geolocation";
+import { trackHospitalInteraction } from "@/lib/analytics";
 
 interface NearestCardProps {
   hospital: Hospital;
 }
 
 export default function NearestCard({ hospital }: NearestCardProps) {
+  const handleCall = () => {
+    trackHospitalInteraction(hospital.id, hospital.name, 'call');
+  };
+
+  const handleDirections = () => {
+    trackHospitalInteraction(hospital.id, hospital.name, 'directions');
+  };
+
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
@@ -52,6 +61,7 @@ export default function NearestCard({ hospital }: NearestCardProps) {
             size="lg"
             className="tap-target font-semibold gap-2"
             asChild
+            onClick={handleCall}
           >
             <a href={`tel:${hospital.tel}`}>
               <Phone className="h-5 w-5" />
@@ -64,6 +74,7 @@ export default function NearestCard({ hospital }: NearestCardProps) {
             variant="outline"
             className="tap-target font-semibold gap-2 border-2"
             asChild
+            onClick={handleDirections}
           >
             <a
               href={getDirectionsUrl(hospital.lat, hospital.lng, hospital.name)}

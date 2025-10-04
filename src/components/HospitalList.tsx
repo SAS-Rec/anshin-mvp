@@ -8,9 +8,10 @@ import type { Hospital } from "@/lib/geolocation";
 
 interface HospitalListProps {
   hospitals: Hospital[];
+  selectedHospital?: Hospital | null;
 }
 
-export default function HospitalList({ hospitals }: HospitalListProps) {
+export default function HospitalList({ hospitals, selectedHospital }: HospitalListProps) {
   const [showAll, setShowAll] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   
@@ -37,7 +38,9 @@ export default function HospitalList({ hospitals }: HospitalListProps) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ delay: index * 0.05 }}
             >
-              <Card className="p-4 card-shadow hover:card-shadow-hover transition-shadow">
+              <Card className={`p-4 card-shadow hover:card-shadow-hover transition-all ${
+                selectedHospital?.id === hospital.id ? 'ring-2 ring-primary shadow-lg' : ''
+              }`}>
                 <button
                   onClick={() =>
                     setExpandedId(expandedId === hospital.id ? null : hospital.id)

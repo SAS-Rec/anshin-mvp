@@ -7,8 +7,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NearestCard from "@/components/NearestCard";
 import HospitalList from "@/components/HospitalList";
+import HospitalMap from "@/components/HospitalMap";
+import StatsKPI from "@/components/StatsKPI";
 import type { Hospital, UserLocation } from "@/lib/geolocation";
 import { getUserLocation, sortHospitalsByDistance } from "@/lib/geolocation";
+import { trackSession, trackLocationShared, trackHospitalInteraction } from "@/lib/analytics";
 
 // Default center (Tsuchiura, Ibaraki)
 const DEFAULT_CENTER: [number, number] = [36.0833, 140.2];
@@ -19,7 +22,13 @@ const Index = () => {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const { toast } = useToast();
+
+  // Track session on mount
+  useEffect(() => {
+    trackSession();
+  }, []);
 
   // Load hospitals data
   useEffect(() => {
@@ -45,6 +54,9 @@ const Index = () => {
       .then((location) => {
         setUserLocation(location);
         setLocationError(null);
+        
+        // Track location sharing
+        trackLocationShared(location.lat, location.lng);
         
         // Sort hospitals by distance
         if (hospitals.length > 0) {
@@ -90,6 +102,9 @@ const Index = () => {
         setUserLocation(location);
         setLocationError(null);
         
+        // Track location sharing
+        trackLocationShared(location.lat, location.lng);
+        
         const sorted = sortHospitalsByDistance(hospitals, location);
         setSortedHospitals(sorted);
 
@@ -105,6 +120,16 @@ const Index = () => {
       .finally(() => {
         setIsLoadingLocation(false);
       });
+  };
+
+  const handleHospitalClick = (hospital: Hospital) => {
+    setSelectedHospital(hospital);
+    trackHospitalInteraction(hospital.id, hospital.name, 'view');
+    
+    toast({
+      title: hospital.name,
+      description: `${hospital.distance ? `${hospital.distance} km away • ` : ''}${hospital.tel}`,
+    });
   };
 
   return (
@@ -153,9 +178,31 @@ const Index = () => {
           </motion.div>
         )}
 
-        {/* Hospital List - full width for now (no map) */}
-        <div className="container max-w-4xl mx-auto">
-          <HospitalList hospitals={sortedHospitals} />
+        {/* Stats KPI Cards */}
+        <div className="container px-4 py-6">
+          <StatsKPI />
+        </div>
+
+        {/* Map and Hospital List */}
+        <div className="container px-4 pb-6">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Map */}
+            <div className="lg:sticky lg:top-4 lg:self-start">
+              <HospitalMap 
+                hospitals={sortedHospitals} 
+                userLocation={userLocation}
+                onHospitalClick={handleHospitalClick}
+              />
+            </div>
+
+            {/* Hospital List */}
+            <div>
+              <HospitalList 
+                hospitals={sortedHospitals}
+                selectedHospital={selectedHospital}
+              />
+            </div>
+          </div>
         </div>
       </main>
 
