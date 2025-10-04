@@ -18,7 +18,7 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick }: HospitalMapPr
     if (!mapContainer.current || map.current) return;
 
     // Initialize map
-    mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZS1haS1kZW1vIiwiYSI6ImNtNGJocnh4cDB0Mm4yanM4NG5pYnl6NW0ifQ.example'; // Placeholder - users can add their own
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
