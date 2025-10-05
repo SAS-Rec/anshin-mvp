@@ -17,14 +17,14 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick }: HospitalMapPr
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Initialize map
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    // Initialize map with a working public token
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M3VuYjAxMmQycXRid3VrNWJodmwifQ.0XKKyEIJ8JnWI6KE-OWf_Q';
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: userLocation ? [userLocation.lng, userLocation.lat] : [140.2, 36.0833],
-      zoom: userLocation ? 12 : 10,
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: userLocation ? [userLocation.lng, userLocation.lat] : [139.6917, 35.6895], // Tokyo default
+      zoom: userLocation ? 13 : 11,
     });
 
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
