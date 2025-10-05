@@ -1,9 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import type { Hospital, UserLocation } from "@/lib/geolocation";
 import { Button } from "./ui/button";
 import { Map, Satellite, Layers } from "lucide-react";
+
+// Fix for default marker icons in Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 interface HospitalMapProps {
   hospitals: Hospital[];
@@ -11,143 +20,134 @@ interface HospitalMapProps {
   onHospitalClick?: (hospital: Hospital) => void;
 }
 
+// Component to handle map center changes
+function MapController({ center }: { center: [number, number] }) {
+  const map = useMap();
+  map.setView(center, 13);
+  return null;
+}
+
+// Custom hospital icon
+const createHospitalIcon = (nightService: boolean) => {
+  return L.divIcon({
+    html: `<div style="
+      background-color: ${nightService ? '#ef4444' : '#10b981'};
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    "></div>`,
+    className: '',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+};
+
+// User location icon
+const userIcon = L.divIcon({
+  html: `<div style="
+    background-color: #3b82f6;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  "></div>`,
+  className: '',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
 const HospitalMap = ({ hospitals, userLocation, onHospitalClick }: HospitalMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
   const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'terrain'>('streets');
 
   const mapStyles = {
-    streets: 'mapbox://styles/mapbox/streets-v11',
-    satellite: 'mapbox://styles/mapbox/satellite-streets-v11',
-    terrain: 'mapbox://styles/mapbox/outdoors-v11',
+    streets: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    terrain: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
   };
 
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    // Using a valid public Mapbox token
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M3VuYjAxMmQycXRid3VrNWJodmwifQ.0XKKyEIJ8JnWI6KE-OWf_Q';
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: mapStyles.streets,
-      center: userLocation ? [userLocation.lng, userLocation.lat] : [139.6917, 35.6895],
-      zoom: userLocation ? 13 : 11,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    map.current.addControl(new mapboxgl.FullscreenControl(), 'top-right');
-    map.current.addControl(new mapboxgl.GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      trackUserLocation: true,
-      showUserHeading: true
-    }), 'top-right');
-
-    return () => {
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
-      map.current?.remove();
-      map.current = null;
-    };
-  }, []);
-
-  // Handle map style changes
-  useEffect(() => {
-    if (map.current) {
-      map.current.setStyle(mapStyles[mapStyle]);
-    }
-  }, [mapStyle]);
-
-  // Update map center when user location changes
-  useEffect(() => {
-    if (map.current && userLocation) {
-      map.current.flyTo({
-        center: [userLocation.lng, userLocation.lat],
-        zoom: 13,
-        duration: 2000,
-      });
-
-      // Add user location marker
-      new mapboxgl.Marker({ color: '#3b82f6' })
-        .setLngLat([userLocation.lng, userLocation.lat])
-        .setPopup(new mapboxgl.Popup().setHTML('<strong>Your Location</strong>'))
-        .addTo(map.current);
-    }
-  }, [userLocation]);
-
-  // Update hospital markers
-  useEffect(() => {
-    if (!map.current) return;
-
-    // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
-
-    // Wait for style to load before adding markers
-    const addMarkers = () => {
-      hospitals.forEach((hospital) => {
-        if (!map.current) return;
-
-        const el = document.createElement('div');
-        el.className = 'hospital-marker';
-        el.style.cssText = `
-          background-color: ${hospital.night_service ? '#ef4444' : '#10b981'};
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          border: 3px solid white;
-          cursor: pointer;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          transition: transform 0.2s;
-        `;
-        
-        el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.2)';
-        });
-        
-        el.addEventListener('mouseleave', () => {
-          el.style.transform = 'scale(1)';
-        });
-
-        el.addEventListener('click', () => {
-          onHospitalClick?.(hospital);
-        });
-
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-          <div class="p-2">
-            <h3 class="font-semibold text-sm mb-1">${hospital.name}</h3>
-            ${hospital.distance ? `<p class="text-xs text-muted-foreground mb-1">${hospital.distance} km away</p>` : ''}
-            ${hospital.night_service ? '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded">Night Service</span>' : ''}
-            <div class="mt-2 space-y-1">
-              <a href="tel:${hospital.tel}" class="text-xs text-primary hover:underline block">📞 ${hospital.tel}</a>
-              <a href="${hospital.official}" target="_blank" class="text-xs text-primary hover:underline block">🌐 Website</a>
-            </div>
-          </div>
-        `);
-
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([hospital.lng, hospital.lat])
-          .setPopup(popup)
-          .addTo(map.current!);
-
-        markers.current.push(marker);
-      });
-    };
-
-    if (map.current.isStyleLoaded()) {
-      addMarkers();
-    } else {
-      map.current.once('style.load', addMarkers);
-    }
-  }, [hospitals, onHospitalClick]);
+  const center: [number, number] = userLocation 
+    ? [userLocation.lat, userLocation.lng] 
+    : [35.6895, 139.6917];
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-lg overflow-hidden shadow-lg">
-      <div ref={mapContainer} className="absolute inset-0" />
+      <MapContainer
+        // @ts-ignore - react-leaflet types issue
+        center={center}
+        zoom={userLocation ? 13 : 11}
+        className="w-full h-full min-h-[400px]"
+        zoomControl={true}
+      >
+        <TileLayer
+          url={mapStyles[mapStyle]}
+        />
+        
+        {userLocation && <MapController center={center} />}
+        
+        {/* User Location Marker */}
+        {userLocation && (
+          // @ts-ignore - react-leaflet types issue
+          <Marker 
+            position={[userLocation.lat, userLocation.lng]} 
+            icon={userIcon}
+          >
+            <Popup>
+              <strong>Your Location</strong>
+            </Popup>
+          </Marker>
+        )}
+        
+        {/* Hospital Markers */}
+        {hospitals.map((hospital) => (
+          // @ts-ignore - react-leaflet types issue
+          <Marker
+            key={hospital.id}
+            position={[hospital.lat, hospital.lng]}
+            icon={createHospitalIcon(hospital.night_service)}
+            eventHandlers={{
+              click: () => onHospitalClick?.(hospital),
+            }}
+          >
+            <Popup>
+              <div className="p-2">
+                <h3 className="font-semibold text-sm mb-1">{hospital.name}</h3>
+                {hospital.distance && (
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {hospital.distance} km away
+                  </p>
+                )}
+                {hospital.night_service && (
+                  <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded">
+                    Night Service
+                  </span>
+                )}
+                <div className="mt-2 space-y-1">
+                  <a
+                    href={`tel:${hospital.tel}`}
+                    className="text-xs text-primary hover:underline block"
+                  >
+                    📞 {hospital.tel}
+                  </a>
+                  <a
+                    href={hospital.official}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline block"
+                  >
+                    🌐 Website
+                  </a>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
       
       {/* Map Style Switcher */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+      <div className="absolute top-4 left-4 flex flex-col gap-2 z-[1000]">
         <div className="bg-card/95 backdrop-blur-sm p-2 rounded-lg shadow-md">
           <div className="flex gap-2">
             <Button
