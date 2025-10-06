@@ -192,6 +192,7 @@ const Index = () => {
                 hospitals={sortedHospitals} 
                 userLocation={userLocation}
                 onHospitalClick={handleHospitalClick}
+                selectedHospital={selectedHospital}
               />
             </div>
 
