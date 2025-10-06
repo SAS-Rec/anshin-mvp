@@ -1,6 +1,6 @@
 // @ts-nocheck - react-leaflet v5 has type definition issues
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
+// react-leaflet removed
 import L, { type DivIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Hospital, UserLocation } from "@/lib/geolocation";
@@ -21,12 +21,7 @@ interface HospitalMapProps {
   onHospitalClick?: (hospital: Hospital) => void;
 }
 
-// Component to handle map center changes
-function MapController({ center }: { center: [number, number] }) {
-  const map = useMap();
-  map.setView(center, 13);
-  return null;
-}
+// Removed MapController (using direct Leaflet API)
 
 // Custom hospital icon
 const createHospitalIcon = (nightService: boolean): DivIcon => {
@@ -73,71 +68,102 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick }: HospitalMapPr
     ? [userLocation.lat, userLocation.lng] 
     : [35.6895, 139.6917];
 
+  // Leaflet map + layers refs
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const hospitalMarkersRef = useRef<Record<string, L.Marker>>({});
+
+  // Init map once
+  useEffect(() => {
+    if (mapRef.current || !mapContainerRef.current) return;
+    const map = L.map(mapContainerRef.current, { zoomControl: true, attributionControl: true });
+    map.setView(center, userLocation ? 13 : 11);
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      tileLayerRef.current = null;
+      userMarkerRef.current = null;
+      hospitalMarkersRef.current = {} as Record<string, L.Marker>;
+    };
+  }, []);
+
+  // Update base layer when style changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+    }
+
+    const attributionMap: Record<string, string> = {
+      streets: '&copy; OpenStreetMap contributors',
+      satellite: 'Imagery &copy; Esri',
+      terrain: '&copy; OpenTopoMap contributors',
+    };
+
+    const tile = L.tileLayer(mapStyles[mapStyle], { attribution: attributionMap[mapStyle] });
+    tile.addTo(map);
+    tileLayerRef.current = tile;
+  }, [mapStyle]);
+
+  // Update user location marker and center
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (userLocation) {
+      const pos: [number, number] = [userLocation.lat, userLocation.lng];
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setLatLng(pos);
+      } else {
+        userMarkerRef.current = L.marker(pos, { icon: userIcon }).addTo(map);
+        userMarkerRef.current.bindPopup('<strong>Your Location</strong>');
+      }
+      map.setView(pos, 13);
+    } else if (userMarkerRef.current) {
+      map.removeLayer(userMarkerRef.current);
+      userMarkerRef.current = null;
+    }
+  }, [userLocation]);
+
+  // Render hospital markers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // clear old
+    Object.values(hospitalMarkersRef.current).forEach((m) => map.removeLayer(m));
+    hospitalMarkersRef.current = {};
+
+    hospitals.forEach((h) => {
+      const marker = L.marker([h.lat, h.lng], { icon: createHospitalIcon(h.night_service) })
+        .addTo(map)
+        .on('click', () => onHospitalClick?.(h));
+
+      const html = `
+        <div style="font-size:12px;">
+          <div style="font-weight:600;margin-bottom:4px;">${h.name}</div>
+          ${h.distance ? `<div style="color:#6b7280;margin-bottom:4px;">${h.distance} km away</div>` : ''}
+          ${h.night_service ? `<span style="background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;">Night Service</span>` : ''}
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;">
+            <a href="tel:${h.tel}" style="color:#2563eb;text-decoration:underline;">📞 ${h.tel}</a>
+            <a href="${h.official}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">🌐 Website</a>
+          </div>
+        </div>`;
+      marker.bindPopup(html);
+
+      hospitalMarkersRef.current[h.id] = marker;
+    });
+  }, [hospitals, onHospitalClick]);
+
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-lg overflow-hidden shadow-lg">
-      <MapContainer
-        center={center}
-        zoom={userLocation ? 13 : 11}
-        className="w-full h-full min-h-[400px]"
-        zoomControl={true}
-      >
-        {() => (
-          <>
-            <TileLayer url={mapStyles[mapStyle]} />
-            {userLocation && <MapController center={center} />}
-
-            {/* User Location Marker */}
-            {userLocation && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
-                <Popup>
-                  <strong>Your Location</strong>
-                </Popup>
-              </Marker>
-            )}
-
-            {/* Hospital Markers */}
-            {hospitals.map((hospital) => (
-              <Marker
-                key={hospital.id}
-                position={[hospital.lat, hospital.lng]}
-                icon={createHospitalIcon(hospital.night_service)}
-                eventHandlers={{
-                  click: () => onHospitalClick?.(hospital),
-                }}
-              >
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-sm mb-1">{hospital.name}</h3>
-                    {hospital.distance && (
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {hospital.distance} km away
-                      </p>
-                    )}
-                    {hospital.night_service && (
-                      <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded">
-                        Night Service
-                      </span>
-                    )}
-                    <div className="mt-2 space-y-1">
-                      <a href={`tel:${hospital.tel}`} className="text-xs text-primary hover:underline block">
-                        📞 {hospital.tel}
-                      </a>
-                      <a
-                        href={hospital.official}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline block"
-                      >
-                        🌐 Website
-                      </a>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </>
-        )}
-      </MapContainer>
+      <div ref={mapContainerRef} className="w-full h-full min-h-[400px]" aria-label="Hospital map" />
       
       {/* Map Style Switcher */}
       <div className="absolute top-4 left-4 flex flex-col gap-2 z-[1000]">
