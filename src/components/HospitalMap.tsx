@@ -81,69 +81,62 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick }: HospitalMapPr
         className="w-full h-full min-h-[400px]"
         zoomControl={true}
       >
-        <>
-          <TileLayer
-            url={mapStyles[mapStyle]}
-          />
-          
-          {userLocation && <MapController center={center} />}
-          
-          {/* User Location Marker */}
-          {userLocation && (
-            <Marker 
-              position={[userLocation.lat, userLocation.lng]} 
-              icon={userIcon}
-            >
-              <Popup>
-                <strong>Your Location</strong>
-              </Popup>
-            </Marker>
-          )}
-          
-          {/* Hospital Markers */}
-          {hospitals.map((hospital) => (
-            <Marker
-              key={hospital.id}
-              position={[hospital.lat, hospital.lng]}
-              icon={createHospitalIcon(hospital.night_service)}
-              eventHandlers={{
-                click: () => onHospitalClick?.(hospital),
-              }}
-            >
-              <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold text-sm mb-1">{hospital.name}</h3>
-                  {hospital.distance && (
-                    <p className="text-xs text-muted-foreground mb-1">
-                      {hospital.distance} km away
-                    </p>
-                  )}
-                  {hospital.night_service && (
-                    <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded">
-                      Night Service
-                    </span>
-                  )}
-                  <div className="mt-2 space-y-1">
-                    <a
-                      href={`tel:${hospital.tel}`}
-                      className="text-xs text-primary hover:underline block"
-                    >
-                      📞 {hospital.tel}
-                    </a>
-                    <a
-                      href={hospital.official}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline block"
-                    >
-                      🌐 Website
-                    </a>
+        {() => (
+          <>
+            <TileLayer url={mapStyles[mapStyle]} />
+            {userLocation && <MapController center={center} />}
+
+            {/* User Location Marker */}
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+                <Popup>
+                  <strong>Your Location</strong>
+                </Popup>
+              </Marker>
+            )}
+
+            {/* Hospital Markers */}
+            {hospitals.map((hospital) => (
+              <Marker
+                key={hospital.id}
+                position={[hospital.lat, hospital.lng]}
+                icon={createHospitalIcon(hospital.night_service)}
+                eventHandlers={{
+                  click: () => onHospitalClick?.(hospital),
+                }}
+              >
+                <Popup>
+                  <div className="p-2">
+                    <h3 className="font-semibold text-sm mb-1">{hospital.name}</h3>
+                    {hospital.distance && (
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {hospital.distance} km away
+                      </p>
+                    )}
+                    {hospital.night_service && (
+                      <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded">
+                        Night Service
+                      </span>
+                    )}
+                    <div className="mt-2 space-y-1">
+                      <a href={`tel:${hospital.tel}`} className="text-xs text-primary hover:underline block">
+                        📞 {hospital.tel}
+                      </a>
+                      <a
+                        href={hospital.official}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline block"
+                      >
+                        🌐 Website
+                      </a>
+                    </div>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </>
+                </Popup>
+              </Marker>
+            ))}
+          </>
+        )}
       </MapContainer>
       
       {/* Map Style Switcher */}
