@@ -200,20 +200,33 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick, selectedHospita
 
       const visitCount = visitCounts[h.id] || 0;
       const html = `
-        <div style="font-size:12px;">
-          <div style="font-weight:600;margin-bottom:4px;">${h.name}</div>
-          ${h.distance ? `<div style="color:#6b7280;margin-bottom:4px;">📍 ${h.distance} km away</div>` : ''}
-          ${h.night_service ? `<span style="background:#ef4444;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;">Night Service</span>` : ''}
-          <div style="margin-top:8px;padding:6px;background:#f3f4f6;border-radius:4px;">
-            <div style="font-weight:600;margin-bottom:4px;color:#1f2937;">📞 ${h.tel}</div>
-            <div style="color:#6b7280;font-size:11px;margin-bottom:4px;">👥 ${visitCount} ${visitCount === 1 ? 'visit' : 'visits'}</div>
+        <div style="font-size:13px;min-width:200px;">
+          <div style="font-weight:700;margin-bottom:8px;font-size:14px;color:#1f2937;">${h.name}</div>
+          ${h.distance ? `
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span style="font-size:16px;">📍</span>
+              <span style="color:#6b7280;font-weight:600;">${h.distance} km away</span>
+            </div>
+          ` : ''}
+          ${h.night_service ? `
+            <span style="background:#ef4444;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;display:inline-block;margin-bottom:8px;">
+              🌙 Night Service Available
+            </span>
+          ` : ''}
+          <div style="margin-top:10px;padding:10px;background:#f8f9fa;border-radius:8px;border-left:3px solid #8b5cf6;">
+            <div style="font-weight:700;margin-bottom:6px;color:#1f2937;font-size:13px;">📞 ${h.tel}</div>
+            <div style="color:#6b7280;font-size:12px;margin-bottom:4px;">👥 <strong>${visitCount}</strong> ${visitCount === 1 ? 'visit' : 'visits'} tracked</div>
           </div>
-          <div style="margin-top:6px;">
-            <a href="tel:${h.tel}" style="color:#2563eb;text-decoration:underline;font-size:11px;display:block;margin-bottom:4px;">📱 Call Now</a>
-            <a href="${h.official}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;font-size:11px;display:block;">🌐 Visit Website</a>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;">
+            <a href="tel:${h.tel}" style="color:#fff;background:#10b981;text-decoration:none;font-size:12px;display:block;padding:8px 12px;border-radius:6px;text-align:center;font-weight:600;">
+              📱 Call Now
+            </a>
+            <a href="${h.official}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;font-size:11px;display:block;text-align:center;">
+              🌐 Visit Website
+            </a>
           </div>
         </div>`;
-      marker.bindPopup(html);
+      marker.bindPopup(html, { maxWidth: 250 });
 
       hospitalMarkersRef.current[h.id] = marker;
     });
@@ -222,10 +235,12 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick, selectedHospita
   // Draw route to selected hospital
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !userLocation || !selectedHospital) {
+    if (!map) return;
+    
+    if (!userLocation || !selectedHospital) {
       // Remove route if no selection
       if (routeLineRef.current) {
-        map?.removeLayer(routeLineRef.current);
+        map.removeLayer(routeLineRef.current);
         routeLineRef.current = null;
       }
       return;
@@ -236,7 +251,7 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick, selectedHospita
       map.removeLayer(routeLineRef.current);
     }
 
-    // Draw new route line
+    // Draw new route line - more prominent
     const route = L.polyline(
       [
         [userLocation.lat, userLocation.lng],
@@ -244,26 +259,50 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick, selectedHospita
       ],
       {
         color: '#8b5cf6',
-        weight: 3,
-        opacity: 0.7,
-        dashArray: '10, 10'
+        weight: 5,
+        opacity: 0.8,
+        dashArray: '15, 10',
+        lineCap: 'round'
       }
     ).addTo(map);
 
     routeLineRef.current = route;
 
-    // Fit map to show both points
+    // Add animated pulse effect to the route
+    let opacity = 0.8;
+    let increasing = false;
+    const pulseInterval = setInterval(() => {
+      if (increasing) {
+        opacity += 0.05;
+        if (opacity >= 1) increasing = false;
+      } else {
+        opacity -= 0.05;
+        if (opacity <= 0.5) increasing = true;
+      }
+      route.setStyle({ opacity });
+    }, 100);
+
+    // Fit map to show both points with padding
     const bounds = L.latLngBounds([
       [userLocation.lat, userLocation.lng],
       [selectedHospital.lat, selectedHospital.lng]
     ]);
-    map.fitBounds(bounds, { padding: [50, 50] });
+    map.fitBounds(bounds, { 
+      padding: [80, 80],
+      maxZoom: 15 
+    });
 
-    // Open popup for selected hospital
-    const selectedMarker = hospitalMarkersRef.current[selectedHospital.id];
-    if (selectedMarker) {
-      selectedMarker.openPopup();
-    }
+    // Open popup for selected hospital after a short delay
+    setTimeout(() => {
+      const selectedMarker = hospitalMarkersRef.current[selectedHospital.id];
+      if (selectedMarker) {
+        selectedMarker.openPopup();
+      }
+    }, 500);
+
+    return () => {
+      clearInterval(pulseInterval);
+    };
   }, [selectedHospital, userLocation]);
 
   return (
