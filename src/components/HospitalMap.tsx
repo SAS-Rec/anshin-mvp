@@ -239,7 +239,7 @@ const HospitalMap = ({ hospitals, userLocation, onHospitalClick, selectedHospita
     
     if (!userLocation || !selectedHospital) {
       // Remove route if no selection
-      if (routeLineRef.current) {
+      if (routeLineRef.current && map) {
         map.removeLayer(routeLineRef.current);
         routeLineRef.current = null;
       }
